@@ -1,0 +1,31 @@
+#carousel-container {
+    display: flex;
+    box-sizing: border-box;
+    border: 1px solid black;
+    overflow-x: hidden;    
+}
+
+.carousel-inside-container {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    width: 10000px !important;   
+}
+
+.carousel-inside-container div {
+    height: 100%;
+}
+
+.carousel-inside-container div img {
+    max-height: 100%;
+    max-width: 100%;
+}
+
+img {
+    user-drag: none; 
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
