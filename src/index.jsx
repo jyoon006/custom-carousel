@@ -18,7 +18,7 @@ class Carousel extends Component {
 
         let imageWidth = this.props.carouselWidth / this.props.showImages;
 
-        const func = ( children ) => {
+        const changeImageWidth = ( children ) => {
             return React.Children.map(children, (childNode) => {
                 console.log('children', children, 'childNode', typeof childNode)
                 return React.cloneElement(childNode, { 
@@ -32,7 +32,7 @@ class Carousel extends Component {
         return (
             <div id="carousel-container" style={ styles }>
                 <div className="carousel-inside-container" style= { styles }>
-                   { func(this.props.children) }
+                   { changeImageWidth(this.props.children) }
                 </div>
             </div>
         )
