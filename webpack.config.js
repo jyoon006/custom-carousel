@@ -14,7 +14,8 @@ const config = {
     loaders : [
       { test : /\.jsx?/, include : [ APP_DIR, SRC_DIR ], loader : 'babel-loader' },
       { test: /\.js$/, include : APP_DIR, loader : 'babel-loader', exclude: /node_modules/ },
-      { test: /\.css$/, loader: ['style-loader', 'css-loader'] }
+      { test: /\.css$/, loader: ['style-loader', 'css-loader'] },
+      { test: /\.svg$/, loader: 'svg-inline-loader' }
     ]
   }
 };

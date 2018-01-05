@@ -7,8 +7,7 @@ class Example extends Component {
         let options = {
             carouselWidth: 1800,
             imageHeight: 250,
-            imageWidth: 400,
-            showImages: 4
+            imageWidth: 400
         };
 
         return (

@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import './index.css';
+import rightArrowSVG from './svg/Down-Arrow.svg';
 
 class Carousel extends Component {
 
@@ -8,6 +9,17 @@ class Carousel extends Component {
         // document.querySelector('#carousel-container').addEventListener('mousedown', (event) => {
         //     console.log('EVENT', event)
         // });
+    }
+
+    changeImageWidth(children) {
+        return React.Children.map(children, (childNode) => {
+            return React.cloneElement(childNode, { 
+                style: {
+                    width: this.props.imageWidth ? `${this.props.imageWidth}px` : '500px',
+                    height: this.props.imageHeight ? `${this.props.imageHeight}px` : '500px'
+                }
+            });
+        });
     }
 
     render() { 
@@ -20,26 +32,19 @@ class Carousel extends Component {
             if(this.props.imageWidth) styles.width = this.props.imageWidth * this.props.showImages;
             else styles.width = 500 * this.props.showImages;
         }
-        // let imageWidth = this.props.carouselWidth / this.props.showImages;
-        console.log('asdfsad', this.props.imageWidth)
-        const changeImageWidth = ( children ) => {
-            return React.Children.map(children, (childNode) => {
-                return React.cloneElement(childNode, { 
-                    style: {
-                        width: this.props.imageWidth ? `${this.props.imageWidth}px` : '500px',
-                        height: this.props.imageHeight ? `${this.props.imageHeight}px` : '500px'
-                    }
-                });
-            });
-        }
+
 
         return (
-            <div id="carousel-container" style={ styles }>
-                
-                <div className="carousel-inside-container" style= { styles }>
-                   { changeImageWidth(this.props.children) }
+            <div id="main-container">
+                <div className= "chevron-left" dangerouslySetInnerHTML={{ __html: rightArrowSVG }}></div>
+                <div id="carousel-container" style={ styles }>
+                    <div className="carousel-inside-container" style= { styles }>
+                    { this.changeImageWidth(this.props.children) }
+                    </div>
                 </div>
+                <div className= "chevron-right" dangerouslySetInnerHTML={{ __html: rightArrowSVG }}></div>
             </div>
+            
         )
     }
 }
