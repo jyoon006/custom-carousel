@@ -7,7 +7,7 @@ class Carousel extends Component {
         super();
         this.handleClick = this.handleClick.bind(this);
         this.state = {
-            currentPosition: 0
+            currentShiftedPosition: 0
         };
     }
     componentDidMount() {
@@ -28,9 +28,8 @@ class Carousel extends Component {
         });
     }
     handleClick(event) {
-        console.log('event', event.currentTarget.title)
         if(event.currentTarget.title === 'chevron-right') {
-            if(this.props.showImages > 0) this.handleTransform('.carousel-inside-container', -(this.props.imageWidth * this.props.showImages) || -(500 * this.props.showImages));
+            if(this.props.showImages > 0) this.handleTransform('.carousel-inside-container', -(Number(document.querySelector('.carousel-inside-container div').style.width.slice(0, -2)) * this.props.showImages) || -(500 * this.props.showImages));
             else this.handleTransform('.carousel-inside-container', -200);
         } else {
 
@@ -39,18 +38,48 @@ class Carousel extends Component {
 
     handleTransform(target, shift) {
         let maxShift = null;
-        let currentShift = this.state.currentPosition + shift;
-        let imageDivWidth = this.props.children.length * this.props.imageWidth;
+        const carouselWidth = Number(document.querySelector('#carousel-container').style.width.slice(0, -2));
+        const imageWidth = Number(document.querySelector('.carousel-inside-container div').style.width.slice(0, -2));
+        const imageDivWidth = imageWidth * this.props.children.length;
+        console.log('arguments', shift, imageWidth, imageDivWidth, carouselWidth)
 
-        console.log((currentShift), -(imageDivWidth))
+        if(shift < 0) {
+            console.log(this.state.currentShiftedPosition + shift, -imageDivWidth)
+            // console.log(imageDivWidth + shift, this.state.currentShiftedPosition + carouselWidth)
 
-        if(currentShift > -(imageDivWidth)) maxShift = imageDivWidth + currentShift;
-        console.log('maxShift', maxShift)
+            console.log(this.state.currentShiftedPosition + (shift * 2) > -imageDivWidth)
 
-        document.querySelector(target).style.transform = maxShift ? `translateX(-${maxShift}px` : `translateX(${currentShift}px)`;
-        document.querySelector(target).style.transition = '0.5s ease-in';
+            if(this.state.currentShiftedPosition + (shift * 2) > -imageDivWidth) {
+                this.setState({ currentShiftedPosition: this.state.currentShiftedPosition + shift }, () => {
+                    document.querySelector(target).style.transform = `translateX(${this.state.currentShiftedPosition}px)`;
+                    document.querySelector(target).style.transition = '0.2s ease-in';
+                });
+            } else {
+                const maxImagesToShow = carouselWidth / imageWidth;
+                let maxShift = -(imageDivWidth - (maxImagesToShow * imageWidth));
+                this.setState({ currentShiftedPosition: maxShift }, () => {
+                    document.querySelector(target).style.transform = `translateX(${this.state.currentShiftedPosition}px)`;
+                    document.querySelector(target).style.transition = '0.2s ease-in';
+                });
+            }
+        }
+        //if shift is negative, carousel transforms negative pixels
 
-        this.setState({ currentPosition: maxShift || currentShift  });
+        // console.log((currentShift), imageDivWidth)
+
+        // if(imageDivWidth <= )
+
+        // if(currentShift > imageDivWidth) maxShift = imageDivWidth + currentShift;
+        // console.log('maxShift', maxShift)
+
+        
+     
+        //     document.querySelector(target).style.transform = maxShift ? `translateX(-${maxShift}px` : `translateX(${currentShift}px)`;
+        //     document.querySelector(target).style.transition = '0.5s ease-in';
+    
+        
+
+        // this.setState({ currentPosition: -maxShift || currentShift  });
     }
 
     render() { 
