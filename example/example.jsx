@@ -21,6 +21,15 @@ class Example extends Component {
                     <div><img src='https://i.ytimg.com/vi/5yIccPnhvy0/maxresdefault.jpg' /></div>
                     <div><img src='https://i.ytimg.com/vi/5yIccPnhvy0/maxresdefault.jpg' /></div>
                     <div><img src='https://i.ytimg.com/vi/5yIccPnhvy0/maxresdefault.jpg' /></div>
+                    <div><img src='https://i.ytimg.com/vi/5yIccPnhvy0/maxresdefault.jpg' /></div>
+                    <div><img src='https://i.ytimg.com/vi/5yIccPnhvy0/maxresdefault.jpg' /></div>
+                    <div><img src='https://i.ytimg.com/vi/5yIccPnhvy0/maxresdefault.jpg' /></div>
+                    <div><img src='https://i.ytimg.com/vi/5yIccPnhvy0/maxresdefault.jpg' /></div>
+                    <div><img src='https://i.ytimg.com/vi/5yIccPnhvy0/maxresdefault.jpg' /></div>
+                    <div><img src='https://i.ytimg.com/vi/5yIccPnhvy0/maxresdefault.jpg' /></div>
+                    <div><img src='https://i.ytimg.com/vi/5yIccPnhvy0/maxresdefault.jpg' /></div>
+                    <div><img src='https://i.ytimg.com/vi/5yIccPnhvy0/maxresdefault.jpg' /></div>
+                    <div><img src='https://i.ytimg.com/vi/5yIccPnhvy0/maxresdefault.jpg' /></div>
                 </ArtCarousel>
                     
             </div>

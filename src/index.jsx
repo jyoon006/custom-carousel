@@ -30,56 +30,53 @@ class Carousel extends Component {
     handleClick(event) {
         if(event.currentTarget.title === 'chevron-right') {
             if(this.props.showImages > 0) this.handleTransform('.carousel-inside-container', -(Number(document.querySelector('.carousel-inside-container div').style.width.slice(0, -2)) * this.props.showImages) || -(500 * this.props.showImages));
-            else this.handleTransform('.carousel-inside-container', -200);
+            else this.handleTransform('.carousel-inside-container', 'negative');
         } else {
-
+            if(this.props.showImages > 0) this.handleTransform('.carousel-inside-container', Number(document.querySelector('.carousel-inside-container div').style.width.slice(0, -2) * this.props.showImages) || 500 * this.props.showImages);
+            else this.handleTransform('.carousel-inside-container', 'positive');
         }
     }
 
     handleTransform(target, shift) {
+        
         let maxShift = null;
         const carouselWidth = Number(document.querySelector('#carousel-container').style.width.slice(0, -2));
         const imageWidth = Number(document.querySelector('.carousel-inside-container div').style.width.slice(0, -2));
         const imageDivWidth = imageWidth * this.props.children.length;
-        console.log('arguments', shift, imageWidth, imageDivWidth, carouselWidth)
+        const maxImagesToShow = carouselWidth / imageWidth;
+        console.log('arguments', target, shift, imageWidth, imageDivWidth, carouselWidth, this.state.currentShiftedPosition)
 
+        if(shift === 'negative') shift = -(Math.floor(maxImagesToShow) * imageWidth);
+        else if(shift === 'positive') shift = Math.floor(maxImagesToShow) * imageWidth;
+        
         if(shift < 0) {
-            console.log(this.state.currentShiftedPosition + shift, -imageDivWidth)
-            // console.log(imageDivWidth + shift, this.state.currentShiftedPosition + carouselWidth)
-
-            console.log(this.state.currentShiftedPosition + (shift * 2) > -imageDivWidth)
-
             if(this.state.currentShiftedPosition + (shift * 2) > -imageDivWidth) {
                 this.setState({ currentShiftedPosition: this.state.currentShiftedPosition + shift }, () => {
                     document.querySelector(target).style.transform = `translateX(${this.state.currentShiftedPosition}px)`;
                     document.querySelector(target).style.transition = '0.2s ease-in';
                 });
             } else {
-                const maxImagesToShow = carouselWidth / imageWidth;
-                let maxShift = -(imageDivWidth - (maxImagesToShow * imageWidth));
+                maxShift = -(imageDivWidth - (maxImagesToShow * imageWidth));
+                this.setState({ currentShiftedPosition: maxShift }, () => {
+                    document.querySelector(target).style.transform = `translateX(${this.state.currentShiftedPosition}px)`;
+                    document.querySelector(target).style.transition = '0.2s ease-in';
+                });
+            }
+        } else {
+            if(this.state.currentShiftedPosition + (shift) <= 0) {
+                this.setState({ currentShiftedPosition: this.state.currentShiftedPosition + shift }, () => {
+                    document.querySelector(target).style.transform = `translateX(${this.state.currentShiftedPosition}px)`;
+                    document.querySelector(target).style.transition = '0.2s ease-in';
+                });
+            } else {
+                maxShift = 0;
                 this.setState({ currentShiftedPosition: maxShift }, () => {
                     document.querySelector(target).style.transform = `translateX(${this.state.currentShiftedPosition}px)`;
                     document.querySelector(target).style.transition = '0.2s ease-in';
                 });
             }
         }
-        //if shift is negative, carousel transforms negative pixels
-
-        // console.log((currentShift), imageDivWidth)
-
-        // if(imageDivWidth <= )
-
-        // if(currentShift > imageDivWidth) maxShift = imageDivWidth + currentShift;
-        // console.log('maxShift', maxShift)
-
         
-     
-        //     document.querySelector(target).style.transform = maxShift ? `translateX(-${maxShift}px` : `translateX(${currentShift}px)`;
-        //     document.querySelector(target).style.transition = '0.5s ease-in';
-    
-        
-
-        // this.setState({ currentPosition: -maxShift || currentShift  });
     }
 
     render() { 
