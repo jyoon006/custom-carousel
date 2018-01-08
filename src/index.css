@@ -40,9 +40,15 @@ img {
 .chevron-left svg {
     height: 40px;
     transform: rotate(90deg);
+    cursor: pointer;
 }
 
 .chevron-right svg {
     height: 40px;
     transform: rotate(-90deg);
+    cursor: pointer;
+}
+
+.chevron-left svg:hover #Desktop-Address, .chevron-right svg:hover #Desktop-Address {
+    stroke: #EBE9E9;
 }
