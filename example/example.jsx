@@ -6,10 +6,10 @@ class Example extends Component {
     render() {
         let options = {
             carouselWidth: 1800,
-            imageHeight: 250,
-            imageWidth: 400,
+            imageHeight: 203,
+            imageWidth: 251,
             // showArrows: false
-            // showImages: 4
+            // showImages: 1
         };
 
         return (

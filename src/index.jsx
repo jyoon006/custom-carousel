@@ -1,14 +1,14 @@
 import React, { Component } from 'react';
 import './index.css';
 import rightArrowSVG from './svg/Down-Arrow.svg';
-import _debounce from './debounce';
+import _throttle from './throttle';
 
 class Carousel extends Component {
     constructor() {
         super();
         this.handleClick = this.handleClick.bind(this);
         this.handleMouseDown = this.handleMouseDown.bind(this);
-        this.mousemoveListener = this.mousemoveListener.bind(this);
+        this.mousemoveListener = _throttle(this.mousemoveListener.bind(this), 30);
         this.mouseupListener = this.mouseupListener.bind(this);
         this.captureMouseEvents = this.captureMouseEvents.bind(this);
         this.state = {
@@ -26,7 +26,7 @@ class Carousel extends Component {
 
     componentDidMount() {
         const carouselWidth = document.querySelector('#carousel-container').offsetWidth;
-        const imageWidth = Number(document.querySelector('.carousel-inside-container div').style.width.slice(0, -2));
+        const imageWidth = document.querySelector('.carousel-inside-container div').offsetWidth;
         const imageDivWidth = imageWidth * this.props.children.length;
         const maxImagesToShow = carouselWidth / imageWidth;
 
@@ -36,24 +36,33 @@ class Carousel extends Component {
             imageDivWidth: imageDivWidth,
             maxImagesToShow: maxImagesToShow
         });
-
     }
  
     mousemoveListener(event) {
+        console.log('here')
         event.preventDefault();
+        
         if(this.state.mouseDown) this.setState({ previousMovementX: event.layerX });
         if(this.state.currentShiftedPosition < (-(this.state.imageDivWidth) + (this.props.showImages ? Math.floor(this.state.maxImagesToShow) : this.state.maxImagesToShow) * this.state.imageWidth)) this.setState({ showRightArrow: 'hidden' });
         if(this.state.currentShiftedPosition >= 0) this.setState({ showLeftArrow: 'hidden'});
-
+        
         if(this.state.previousMovementX - event.layerX > 0 && this.state.currentShiftedPosition > (-(this.state.imageDivWidth) + (this.props.showImages ? Math.floor(this.state.maxImagesToShow) : this.state.maxImagesToShow) * this.state.imageWidth)) {
             this.setState({ currentShiftedPosition: this.state.currentShiftedPosition - 15, showLeftArrow: 'visible' }, () => {
                 document.querySelector('.carousel-inside-container').style.transform = `translateX(${this.state.currentShiftedPosition}px)`;
+                document.querySelector('.carousel-inside-container').style.WebkitTransform = `translateX(${this.state.currentShiftedPosition}px)`;
+                document.querySelector('.carousel-inside-container').style.msTransform = `translateX(${this.state.currentShiftedPosition}px)`;
+                document.querySelector('.carousel-inside-container').style.MozTransform = `translateX(${this.state.currentShiftedPosition}px)`;
+                document.querySelector('.carousel-inside-container').style.OTransform = `translateX(${this.state.currentShiftedPosition}px)`;
                 document.querySelector('.carousel-inside-container').style.transition = '0.1s linear'; 
             })
                 
         } else if(this.state.previousMovementX - event.layerX < 0 && this.state.currentShiftedPosition < 0) {
             this.setState({ currentShiftedPosition: this.state.currentShiftedPosition + 15, showRightArrow: 'visible' }, () => {
                 document.querySelector('.carousel-inside-container').style.transform = `translateX(${this.state.currentShiftedPosition}px)`;
+                document.querySelector('.carousel-inside-container').style.WebkitTransform = `translateX(${this.state.currentShiftedPosition}px)`;
+                document.querySelector('.carousel-inside-container').style.msTransform = `translateX(${this.state.currentShiftedPosition}px)`;
+                document.querySelector('.carousel-inside-container').style.MozTransform = `translateX(${this.state.currentShiftedPosition}px)`;
+                document.querySelector('.carousel-inside-container').style.OTransform = `translateX(${this.state.currentShiftedPosition}px)`;
                 document.querySelector('.carousel-inside-container').style.transition = '0.1s linear'; 
             })
         }
@@ -64,11 +73,13 @@ class Carousel extends Component {
 
     mouseupListener(event) {
         event.stopPropagation();
+        document.querySelector('.carousel-inside-container').style.willChange = 'unset';
         document.removeEventListener('mouseup', this.mouseupListener, true);
         document.querySelector('.carousel-inside-container').removeEventListener('mousemove', this.mousemoveListener, true);
     }
 
     captureMouseEvents() {
+        document.querySelector('.carousel-inside-container').style.willChange = 'transform';
         document.addEventListener('mouseup', this.mouseupListener, true);
         document.querySelector('.carousel-inside-container').addEventListener('mousemove', this.mousemoveListener, true);
     }
@@ -94,15 +105,18 @@ class Carousel extends Component {
     }
 
     handleClick(event) {
+        console.log('touched', event.currentTarget.className)
+
         if(event.currentTarget.className === 'chevron-right') {
             if(this.state.currentShiftedPosition === (-(this.state.imageDivWidth) + Math.floor(this.state.maxImagesToShow) * this.state.imageWidth)) return;
+            console.log('here')
             this.setState({ showLeftArrow: 'visible' });
-            if(this.props.showImages > 0) this.handleTransform('.carousel-inside-container', -(Number(document.querySelector('.carousel-inside-container div').style.width.slice(0, -2)) * this.props.showImages) || -(500 * this.props.showImages));
+            if(this.props.showImages > 0) this.handleTransform('.carousel-inside-container', -(this.state.imageWidth) * this.props.showImages) || -(500 * this.props.showImages);
             else this.handleTransform('.carousel-inside-container', 'negative');
         } else {
             if(this.state.currentShiftedPosition === 0) return;
             this.setState({ showRightArrow: 'visible' });
-            if(this.props.showImages > 0) this.handleTransform('.carousel-inside-container', Number(document.querySelector('.carousel-inside-container div').style.width.slice(0, -2) * this.props.showImages) || 500 * this.props.showImages);
+            if(this.props.showImages > 0) this.handleTransform('.carousel-inside-container', this.state.imageWidth * this.props.showImages || 500 * this.props.showImages);
             else this.handleTransform('.carousel-inside-container', 'positive');
         }
     }
@@ -110,10 +124,10 @@ class Carousel extends Component {
     handleTransform(target, shift) {
         
         let maxShift = null;
-       
-        if(shift === 'negative') shift = -(Math.floor(this.state.maxImagesToShow) * this.state.imageWidth);
-        else if(shift === 'positive') shift = Math.floor(this.state.maxImagesToShow) * this.state.imageWidth;
-
+        
+        if(shift === 'negative') shift = window.innerWidth < 768 ? -(Math.ceil(this.state.maxImagesToShow) * this.state.imageWidth) : -(Math.floor(this.state.maxImagesToShow) * this.state.imageWidth);
+        else if(shift === 'positive') shift = window.innerWidth < 768 ? Math.ceil(this.state.maxImagesToShow) * this.state.imageWidth : Math.floor(this.state.maxImagesToShow) * this.state.imageWidth;
+        console.log('target', target, shift)
         if(shift < 0) {
             if(this.state.currentShiftedPosition + (shift * 2) > -(this.state.imageDivWidth)) {
                 
