@@ -115,6 +115,8 @@ class Carousel extends Component {
 
         if(shift < 0) {
             if(this.state.currentShiftedPosition + (shift * 2) > -(this.state.imageDivWidth)) {
+                
+                if(this.state.currentShiftedPosition + (shift) === -(this.state.imageDivWidth - (this.state.maxImagesToShow * this.state.imageWidth))) this.setState({ showRightArrow: 'hidden' });
                 this.setState({ currentShiftedPosition: this.state.currentShiftedPosition + shift }, () => {
                     document.querySelector(target).style.transform = `translateX(${this.state.currentShiftedPosition}px)`;
                     document.querySelector(target).style.transition = '0.2s ease-in';
@@ -128,11 +130,13 @@ class Carousel extends Component {
             }
         } else {
             if(this.state.currentShiftedPosition + (shift) <= 0) {
+                if(this.state.currentShiftedPosition + shift === 0) this.setState({ showLeftArrow: 'hidden' });
                 this.setState({ currentShiftedPosition: this.state.currentShiftedPosition + shift }, () => {
                     document.querySelector(target).style.transform = `translateX(${this.state.currentShiftedPosition}px)`;
                     document.querySelector(target).style.transition = '0.2s ease-in';
                 });
             } else {
+                
                 maxShift = 0;
                 this.setState({ currentShiftedPosition: maxShift, showLeftArrow: 'hidden' }, () => {
                     document.querySelector(target).style.transform = `translateX(${this.state.currentShiftedPosition}px)`;
