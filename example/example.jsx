@@ -15,7 +15,7 @@ class Example extends Component {
             <div>
                 <h2>Carousel Example</h2>
                 <ArtCarousel { ...options }>
-                    <div><img src='https://i.ytimg.com/vi/i3Pc_P1_bT0/maxresdefault.jpg' /></div>
+                    <div><a href=""><img src='https://i.ytimg.com/vi/i3Pc_P1_bT0/maxresdefault.jpg' /></a></div>
                     <div><img src='https://i.ytimg.com/vi/5yIccPnhvy0/maxresdefault.jpg' /></div>
                     <div><img src='https://cdn-images-1.medium.com/max/1242/1*3fxwk_21oPeikN2q4siUpg@2x.jpeg' /></div>
                     <div><img src='https://i.ytimg.com/vi/5yIccPnhvy0/maxresdefault.jpg' /></div>
