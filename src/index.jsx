@@ -43,7 +43,7 @@ class Carousel extends Component {
         event.preventDefault();
         if(this.state.mouseDown) this.setState({ previousMovementX: event.layerX });
         if(this.state.currentShiftedPosition < (-(this.state.imageDivWidth) + (this.props.showImages ? Math.floor(this.state.maxImagesToShow) : this.state.maxImagesToShow) * this.state.imageWidth)) this.setState({ showRightArrow: 'hidden' });
-        if(this.state.currentShiftedPosition === 0) this.setState({ showLeftArrow: 'hidden'});
+        if(this.state.currentShiftedPosition >= 0) this.setState({ showLeftArrow: 'hidden'});
 
         if(this.state.previousMovementX - event.layerX > 0 && this.state.currentShiftedPosition > (-(this.state.imageDivWidth) + (this.props.showImages ? Math.floor(this.state.maxImagesToShow) : this.state.maxImagesToShow) * this.state.imageWidth)) {
             this.setState({ currentShiftedPosition: this.state.currentShiftedPosition - 15, showLeftArrow: 'visible' }, () => {
