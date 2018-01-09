@@ -28,7 +28,7 @@
     /* display: flex; */
 }
 
-img {
+#carousel-container img {
     user-drag: none; 
     user-select: none;
     -moz-user-select: none;

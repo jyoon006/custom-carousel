@@ -18,7 +18,9 @@ class Carousel extends Component {
             carouselWidth: null,
             imageWidth: null,
             imageDivWidth: null,
-            maxImagesToShow: null
+            maxImagesToShow: null,
+            showLeftArrow: 'hidden',
+            showRightArrow: 'initial'
         };
     }
 
@@ -40,15 +42,17 @@ class Carousel extends Component {
     mousemoveListener(event) {
         event.preventDefault();
         if(this.state.mouseDown) this.setState({ previousMovementX: event.layerX });
+        if(this.state.currentShiftedPosition < (-(this.state.imageDivWidth) + (this.props.showImages ? Math.floor(this.state.maxImagesToShow) : this.state.maxImagesToShow) * this.state.imageWidth)) this.setState({ showRightArrow: 'hidden' });
+        if(this.state.currentShiftedPosition === 0) this.setState({ showLeftArrow: 'hidden'});
 
-        if(this.state.previousMovementX - event.layerX > 0 && this.state.currentShiftedPosition > (-(this.state.imageDivWidth) + Math.floor(this.state.maxImagesToShow) * this.state.imageWidth)) {
-            this.setState({ currentShiftedPosition: this.state.currentShiftedPosition - 15}, () => {
+        if(this.state.previousMovementX - event.layerX > 0 && this.state.currentShiftedPosition > (-(this.state.imageDivWidth) + (this.props.showImages ? Math.floor(this.state.maxImagesToShow) : this.state.maxImagesToShow) * this.state.imageWidth)) {
+            this.setState({ currentShiftedPosition: this.state.currentShiftedPosition - 15, showLeftArrow: 'visible' }, () => {
                 document.querySelector('.carousel-inside-container').style.transform = `translateX(${this.state.currentShiftedPosition}px)`;
                 document.querySelector('.carousel-inside-container').style.transition = '0.1s linear'; 
             })
                 
         } else if(this.state.previousMovementX - event.layerX < 0 && this.state.currentShiftedPosition < 0) {
-            this.setState({ currentShiftedPosition: this.state.currentShiftedPosition + 15}, () => {
+            this.setState({ currentShiftedPosition: this.state.currentShiftedPosition + 15, showRightArrow: 'visible' }, () => {
                 document.querySelector('.carousel-inside-container').style.transform = `translateX(${this.state.currentShiftedPosition}px)`;
                 document.querySelector('.carousel-inside-container').style.transition = '0.1s linear'; 
             })
@@ -91,10 +95,12 @@ class Carousel extends Component {
     handleClick(event) {
         if(event.currentTarget.title === 'chevron-right') {
             if(this.state.currentShiftedPosition === (-(this.state.imageDivWidth) + Math.floor(this.state.maxImagesToShow) * this.state.imageWidth)) return;
+            this.setState({ showLeftArrow: 'visible' });
             if(this.props.showImages > 0) this.handleTransform('.carousel-inside-container', -(Number(document.querySelector('.carousel-inside-container div').style.width.slice(0, -2)) * this.props.showImages) || -(500 * this.props.showImages));
             else this.handleTransform('.carousel-inside-container', 'negative');
         } else {
             if(this.state.currentShiftedPosition === 0) return;
+            this.setState({ showRightArrow: 'visible' });
             if(this.props.showImages > 0) this.handleTransform('.carousel-inside-container', Number(document.querySelector('.carousel-inside-container div').style.width.slice(0, -2) * this.props.showImages) || 500 * this.props.showImages);
             else this.handleTransform('.carousel-inside-container', 'positive');
         }
@@ -115,7 +121,7 @@ class Carousel extends Component {
                 });
             } else {
                 maxShift = -(this.state.imageDivWidth - (this.state.maxImagesToShow * this.state.imageWidth));
-                this.setState({ currentShiftedPosition: maxShift }, () => {
+                this.setState({ currentShiftedPosition: maxShift, showRightArrow: 'hidden' }, () => {
                     document.querySelector(target).style.transform = `translateX(${this.state.currentShiftedPosition}px)`;
                     document.querySelector(target).style.transition = '0.2s ease-in';
                 });
@@ -128,7 +134,7 @@ class Carousel extends Component {
                 });
             } else {
                 maxShift = 0;
-                this.setState({ currentShiftedPosition: maxShift }, () => {
+                this.setState({ currentShiftedPosition: maxShift, showLeftArrow: 'hidden' }, () => {
                     document.querySelector(target).style.transform = `translateX(${this.state.currentShiftedPosition}px)`;
                     document.querySelector(target).style.transition = '0.2s ease-in';
                 });
@@ -152,13 +158,13 @@ class Carousel extends Component {
 
         return (
             <div id="main-container">
-                <div title="chevron-left" className= "chevron-left" onClick={ this.handleClick } dangerouslySetInnerHTML={{ __html: rightArrowSVG }}></div>
+                { this.props.showArrows ? null : <div title="chevron-left" className= "chevron-left" style={{ visibility: this.state.showLeftArrow }} onClick={ this.handleClick } dangerouslySetInnerHTML={{ __html: rightArrowSVG }}></div>}
                 <div id="carousel-container" style={ carouselStyles } onMouseDown={ this.handleMouseDown }>
                     <div className="carousel-inside-container">
                     { this.changeImageWidth(this.props.children) }
                     </div>
                 </div>
-                <div title="chevron-right" className= "chevron-right" onClick={ this.handleClick } dangerouslySetInnerHTML={{ __html: rightArrowSVG }}></div>
+                { this.props.showArrows ? null : <div title="chevron-right" className= "chevron-right" style={{ visibility: this.state.showRightArrow }} onClick={ this.handleClick } dangerouslySetInnerHTML={{ __html: rightArrowSVG }}></div>}
             </div>
             
         )

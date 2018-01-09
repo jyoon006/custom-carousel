@@ -8,7 +8,8 @@ class Example extends Component {
             carouselWidth: 1800,
             imageHeight: 250,
             imageWidth: 400,
-            showImages: 4
+            // showArrows: false
+            // showImages: 4
         };
 
         return (
