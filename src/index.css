@@ -41,18 +41,36 @@
     max-width: 100%;
 }
 
-.chevron-left svg {
-    height: 40px;
-    transform: rotate(90deg);
+.chevron-right, .chevron-left {
+    height: 80px;
+    width: 80px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.8);
+}
+
+.chevron-right:hover, .chevron-left:hover {
+    background-color: white;
     cursor: pointer;
+}
+
+.chevron-right {
+    transform: translateX(-90px);
+}
+
+.chevron-left {
+    transform: translateX(90px);
+    z-index: 10;
+}
+
+.chevron-left svg {
+    height: 10px;
+    transform: rotate(90deg);
 }
 
 .chevron-right svg {
-    height: 40px;
+    height: 10px;
     transform: rotate(-90deg);
-    cursor: pointer;
-}
-
-.chevron-left svg:hover #Desktop-Address, .chevron-right svg:hover #Desktop-Address {
-    stroke: #EBE9E9;
 }

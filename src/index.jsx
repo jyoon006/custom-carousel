@@ -86,14 +86,15 @@ class Carousel extends Component {
             return React.cloneElement(childNode, { 
                 style: {
                     width: this.props.imageWidth ? `${this.props.imageWidth}px` : '500px',
-                    height: this.props.imageHeight ? `${this.props.imageHeight}px` : '500px'
+                    height: this.props.imageHeight ? `${this.props.imageHeight}px` : '500px',
+                    boxSizing: 'border-box'
                 }
             });
         });
     }
 
     handleClick(event) {
-        if(event.currentTarget.title === 'chevron-right') {
+        if(event.currentTarget.className === 'chevron-right') {
             if(this.state.currentShiftedPosition === (-(this.state.imageDivWidth) + Math.floor(this.state.maxImagesToShow) * this.state.imageWidth)) return;
             this.setState({ showLeftArrow: 'visible' });
             if(this.props.showImages > 0) this.handleTransform('.carousel-inside-container', -(Number(document.querySelector('.carousel-inside-container div').style.width.slice(0, -2)) * this.props.showImages) || -(500 * this.props.showImages));
@@ -162,13 +163,13 @@ class Carousel extends Component {
 
         return (
             <div id="main-container">
-                { this.props.showArrows ? null : <div title="chevron-left" className= "chevron-left" style={{ visibility: this.state.showLeftArrow }} onClick={ this.handleClick } dangerouslySetInnerHTML={{ __html: rightArrowSVG }}></div>}
+                { this.props.showArrows ? null : <div className= "chevron-left" style={{ visibility: this.state.showLeftArrow }} onClick={ this.handleClick } dangerouslySetInnerHTML={{ __html: rightArrowSVG }}></div>}
                 <div id="carousel-container" style={ carouselStyles } onMouseDown={ this.handleMouseDown }>
                     <div className="carousel-inside-container">
                     { this.changeImageWidth(this.props.children) }
                     </div>
                 </div>
-                { this.props.showArrows ? null : <div title="chevron-right" className= "chevron-right" style={{ visibility: this.state.showRightArrow }} onClick={ this.handleClick } dangerouslySetInnerHTML={{ __html: rightArrowSVG }}></div>}
+                { this.props.showArrows ? null : <div className= "chevron-right" style={{ visibility: this.state.showRightArrow }} onClick={ this.handleClick } dangerouslySetInnerHTML={{ __html: rightArrowSVG }}></div>}
             </div>
             
         )
