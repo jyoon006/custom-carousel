@@ -25,21 +25,43 @@ class Carousel extends Component {
     }
 
     componentDidMount() {
-        const carouselWidth = document.querySelector('#carousel-container').offsetWidth;
-        const imageWidth = document.querySelector('.carousel-inside-container div').offsetWidth;
-        const imageDivWidth = imageWidth * this.props.children.length;
-        const maxImagesToShow = carouselWidth / imageWidth;
-
-        this.setState({
-            carouselWidth: carouselWidth,
-            imageWidth: imageWidth,
-            imageDivWidth: imageDivWidth,
-            maxImagesToShow: maxImagesToShow
+        this.getImageSize(this.props.children)
+        .then((resolve) =>{
+            let { imageNaturalHeight, imageNaturalWidth } = this.state;
+            this.setState({ 
+                carouselWidth: document.querySelector('#carousel-container').offsetWidth, 
+                imageNaturalHeight: resolve.imageNaturalHeight, 
+                imageNaturalWidth: resolve.imageNaturalWidth,
+                imageWidth: resolve.imageNaturalWidth,
+                imageDivWidth: resolve.imageNaturalWidth * this.props.children.length,
+                maxImagesToShow: document.querySelector('#carousel-container').offsetWidth / resolve.imageNaturalWidth
+            });
+        })
+        .catch((error) => {
+            return console.error(`Error in componentDidMount in getImageSize(): ${error}`);
         });
+
+        // const carouselWidth = document.querySelector('#carousel-container').offsetWidth;
+        // const imageWidth = this.state.imageNaturalWidth;
+        // const imageDivWidth = imageWidth * this.props.children.length;
+        // const maxImagesToShow = carouselWidth / imageWidth;
+
+        // this.setState({
+        //     carouselWidth: carouselWidth,
+        //     imageWidth: imageWidth,
+        //     imageDivWidth: imageDivWidth,
+        //     maxImagesToShow: maxImagesToShow
+        // });
+    }
+
+    componentWillUnmount() {
+        document.removeEventListener('click', handleClick, true);
+        document.removeEventListener('mousemove', mousemoveListener, true);
+        document.removeEventListener('mousedown', handleMouseDown, true);
+        document.removeEventListener('mouseup', mouseupListener, true);
     }
  
     mousemoveListener(event) {
-        console.log('here')
         event.preventDefault();
         
         if(this.state.mouseDown) this.setState({ previousMovementX: event.layerX });
@@ -92,12 +114,43 @@ class Carousel extends Component {
         });    
     }
 
-    changeImageWidth(children) {
+    findImgElement(node) {
+        if(node.type === 'img') {
+            return node;
+        }
+        else if(node.props) {
+            if(node.props.children) {
+                return this.findImgElement(node.props.children);
+            }
+        }    
+    }
+    
+    getImageSize(children, cb) {
+        let counter = 0;
+        let imageNaturalWidth = 0;
+        let imageNaturalHeight = 0;
+        return new Promise((resolve, reject) => {
+            children.map((child) => {
+                let naturalWidth, naturalHeight;
+                let currentImg = this.findImgElement(child);
+                let img = new Image();
+                img.src = currentImg.props.src;
+                img.onload = (image) => {
+                    imageNaturalWidth += img.naturalWidth;
+                    imageNaturalHeight += img.naturalHeight;
+                    counter++;
+                    if(counter === children.length) resolve({ imageNaturalWidth:imageNaturalWidth / children.length, imageNaturalHeight: imageNaturalHeight / children.length });
+                }
+            });
+        });
+    }
+
+    changeImageWidth(children) {        
         return React.Children.map(children, (childNode) => {
             return React.cloneElement(childNode, { 
                 style: {
-                    width: this.props.imageWidth ? `${this.props.imageWidth}px` : '500px',
-                    height: this.props.imageHeight ? `${this.props.imageHeight}px` : '500px',
+                    width: this.state.imageNaturalWidth + 'px'|| '500px',
+                    height: this.state.imageNaturalHeight + 'px' ||'500px',
                     boxSizing: 'border-box'
                 }
             });
@@ -105,11 +158,8 @@ class Carousel extends Component {
     }
 
     handleClick(event) {
-        console.log('touched', event.currentTarget.className)
-
         if(event.currentTarget.className === 'chevron-right') {
             if(this.state.currentShiftedPosition === (-(this.state.imageDivWidth) + Math.floor(this.state.maxImagesToShow) * this.state.imageWidth)) return;
-            console.log('here')
             this.setState({ showLeftArrow: 'visible' });
             if(this.props.showImages > 0) this.handleTransform('.carousel-inside-container', -(this.state.imageWidth) * this.props.showImages) || -(500 * this.props.showImages);
             else this.handleTransform('.carousel-inside-container', 'negative');
@@ -127,7 +177,7 @@ class Carousel extends Component {
         
         if(shift === 'negative') shift = window.innerWidth < 768 ? -(Math.ceil(this.state.maxImagesToShow) * this.state.imageWidth) : -(Math.floor(this.state.maxImagesToShow) * this.state.imageWidth);
         else if(shift === 'positive') shift = window.innerWidth < 768 ? Math.ceil(this.state.maxImagesToShow) * this.state.imageWidth : Math.floor(this.state.maxImagesToShow) * this.state.imageWidth;
-        console.log('target', target, shift)
+        
         if(shift < 0) {
             if(this.state.currentShiftedPosition + (shift * 2) > -(this.state.imageDivWidth)) {
                 

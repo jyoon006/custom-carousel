@@ -5,11 +5,11 @@ import ArtCarousel from '../src/index.jsx';
 class Example extends Component {
     render() {
         let options = {
-            carouselWidth: 1800,
-            imageHeight: 203,
-            imageWidth: 251,
+            carouselWidth: 900,
+            // imageHeight: 252,
+            // imageWidth: 279,
             // showArrows: false
-            // showImages: 1
+            // showImages: 5
         };
 
         return (
