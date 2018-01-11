@@ -15,10 +15,6 @@ class Carousel extends Component {
             currentShiftedPosition: 0,
             previousMovementX: 0,
             mouseDown: false,
-            carouselWidth: null,
-            imageWidth: null,
-            imageDivWidth: null,
-            maxImagesToShow: null,
             showLeftArrow: 'hidden',
             showRightArrow: 'initial'
         };
@@ -27,7 +23,7 @@ class Carousel extends Component {
     componentDidMount() {
         this.getImageSize(this.props.children)
         .then((resolve) =>{
-            let { imageNaturalHeight, imageNaturalWidth } = this.state;
+            let { imageNaturalHeight, imageNaturalWidth, carouselWidth, imageWidth, imageDivWidth, maxImagesToShow } = this.state;
             this.setState({ 
                 carouselWidth: document.querySelector('#carousel-container').offsetWidth, 
                 imageNaturalHeight: resolve.imageNaturalHeight, 
@@ -40,18 +36,6 @@ class Carousel extends Component {
         .catch((error) => {
             return console.error(`Error in componentDidMount in getImageSize(): ${error}`);
         });
-
-        // const carouselWidth = document.querySelector('#carousel-container').offsetWidth;
-        // const imageWidth = this.state.imageNaturalWidth;
-        // const imageDivWidth = imageWidth * this.props.children.length;
-        // const maxImagesToShow = carouselWidth / imageWidth;
-
-        // this.setState({
-        //     carouselWidth: carouselWidth,
-        //     imageWidth: imageWidth,
-        //     imageDivWidth: imageDivWidth,
-        //     maxImagesToShow: maxImagesToShow
-        // });
     }
 
     componentWillUnmount() {
@@ -60,7 +44,7 @@ class Carousel extends Component {
         document.removeEventListener('mousedown', handleMouseDown, true);
         document.removeEventListener('mouseup', mouseupListener, true);
     }
- 
+
     mousemoveListener(event) {
         event.preventDefault();
         
@@ -69,28 +53,14 @@ class Carousel extends Component {
         if(this.state.currentShiftedPosition >= 0) this.setState({ showLeftArrow: 'hidden'});
         
         if(this.state.previousMovementX - event.layerX > 0 && this.state.currentShiftedPosition > (-(this.state.imageDivWidth) + (this.props.showImages ? Math.floor(this.state.maxImagesToShow) : this.state.maxImagesToShow) * this.state.imageWidth)) {
-            this.setState({ currentShiftedPosition: this.state.currentShiftedPosition - 15, showLeftArrow: 'visible' }, () => {
-                document.querySelector('.carousel-inside-container').style.transform = `translateX(${this.state.currentShiftedPosition}px)`;
-                document.querySelector('.carousel-inside-container').style.WebkitTransform = `translateX(${this.state.currentShiftedPosition}px)`;
-                document.querySelector('.carousel-inside-container').style.msTransform = `translateX(${this.state.currentShiftedPosition}px)`;
-                document.querySelector('.carousel-inside-container').style.MozTransform = `translateX(${this.state.currentShiftedPosition}px)`;
-                document.querySelector('.carousel-inside-container').style.OTransform = `translateX(${this.state.currentShiftedPosition}px)`;
-                document.querySelector('.carousel-inside-container').style.transition = '0.1s linear'; 
-            })
+            this.setState({ currentShiftedPosition: this.state.currentShiftedPosition - 15, showLeftArrow: 'visible' })
                 
         } else if(this.state.previousMovementX - event.layerX < 0 && this.state.currentShiftedPosition < 0) {
-            this.setState({ currentShiftedPosition: this.state.currentShiftedPosition + 15, showRightArrow: 'visible' }, () => {
-                document.querySelector('.carousel-inside-container').style.transform = `translateX(${this.state.currentShiftedPosition}px)`;
-                document.querySelector('.carousel-inside-container').style.WebkitTransform = `translateX(${this.state.currentShiftedPosition}px)`;
-                document.querySelector('.carousel-inside-container').style.msTransform = `translateX(${this.state.currentShiftedPosition}px)`;
-                document.querySelector('.carousel-inside-container').style.MozTransform = `translateX(${this.state.currentShiftedPosition}px)`;
-                document.querySelector('.carousel-inside-container').style.OTransform = `translateX(${this.state.currentShiftedPosition}px)`;
-                document.querySelector('.carousel-inside-container').style.transition = '0.1s linear'; 
-            })
+            this.setState({ currentShiftedPosition: this.state.currentShiftedPosition + 15, showRightArrow: 'visible' })
         }
 
-        if(this.state.mouseDown) this.setState({ mouseDown: false });     
-       
+        this.handleTranslateAnimation('.carousel-inside-container', this.state.currentShiftedPosition, '0.1s linear');
+        if(this.state.mouseDown) this.setState({ mouseDown: false });
     }
 
     mouseupListener(event) {
@@ -180,19 +150,20 @@ class Carousel extends Component {
         
         if(shift < 0) {
             if(this.state.currentShiftedPosition + (shift * 2) > -(this.state.imageDivWidth)) {
-                
                 if(this.state.currentShiftedPosition + (shift) === -(this.state.imageDivWidth - (this.state.maxImagesToShow * this.state.imageWidth))) this.setState({ showRightArrow: 'hidden' });
                 this.setState({ currentShiftedPosition: this.state.currentShiftedPosition + shift }, () => {
                     document.querySelector(target).style.transform = `translateX(${this.state.currentShiftedPosition}px)`;
                     document.querySelector(target).style.transition = '0.2s ease-in';
                 });
             } else {
-                maxShift = -(this.state.imageDivWidth - (this.state.maxImagesToShow * this.state.imageWidth));
+                maxShift = -(this.state.imageDivWidth - (Math.floor(this.state.maxImagesToShow) * this.state.imageWidth));
                 this.setState({ currentShiftedPosition: maxShift, showRightArrow: 'hidden' }, () => {
                     document.querySelector(target).style.transform = `translateX(${this.state.currentShiftedPosition}px)`;
                     document.querySelector(target).style.transition = '0.2s ease-in';
                 });
             }
+
+            this.handleTranslateAnimation(target, this.state.currentShiftedPosition, '0.2s ease-in');
         } else {
             if(this.state.currentShiftedPosition + (shift) <= 0) {
                 if(this.state.currentShiftedPosition + shift === 0) this.setState({ showLeftArrow: 'hidden' });
@@ -212,6 +183,15 @@ class Carousel extends Component {
         
     }
 
+    handleTranslateAnimation(target, currentShiftedPosition, transitionOptions) {
+        document.querySelector(target).style.transform = `translateX(${currentShiftedPosition}px)`;
+        document.querySelector(target).style.WebkitTransform = `translateX(${currentShiftedPosition}px)`;
+        document.querySelector(target).style.msTransform = `translateX(${currentShiftedPosition}px)`;
+        document.querySelector(target).style.MozTransform = `translateX(${currentShiftedPosition}px)`;
+        document.querySelector(target).style.OTransform = `translateX(${currentShiftedPosition}px)`;
+        document.querySelector(target).style.transition = transitionOptions; 
+    }
+
     render() { 
         let carouselStyles = {
             height: typeof this.props.carouselHeight === 'number' ? `${this.props.carouselHeight}px`: this.props.carouselHeight || 'auto',
@@ -219,12 +199,10 @@ class Carousel extends Component {
         };
 
         if (this.props.showImages > 0) {
-            if(this.props.imageWidth) carouselStyles.width = this.props.imageWidth * this.props.showImages;
+            if(this.state.imageWidth) carouselStyles.width = this.state.imageWidth * this.props.showImages;
             else carouselStyles.width = 500 * this.props.showImages;
         }
-
-
-
+        
         return (
             <div id="main-container">
                 { this.props.showArrows ? null : <div className= "chevron-left" style={{ visibility: this.state.showLeftArrow }} onClick={ this.handleClick } dangerouslySetInnerHTML={{ __html: rightArrowSVG }}></div>}
