@@ -30,12 +30,25 @@ class Carousel extends Component {
     }
 
     handleCarouselResize() {
-        let windowScreenWidth = arguments[0].currentTarget.innerWidth;
         let domNode = this.findReactDomNode('carouselContainer');
         let maxImagesToShow = domNode.offsetWidth / this.state.imageWidth;
+
+        let isResizedWidthSmaller = domNode.offsetWidth < this.state.carouselWidth ? true : false;
+        
+        
+        let resizedImageShift;
+        if(!isResizedWidthSmaller && (-(this.state.currentShiftedPosition) === (this.state.imageDivWidth - (this.state.maxImagesToShow * this.state.imageWidth)))) {
+            resizedImageShift = this.state.currentShiftedPosition + (domNode.offsetWidth - this.state.carouselWidth);
+        }
+
         this.setState({
             maxImagesToShow: maxImagesToShow,
-            carouselWidth: domNode.offsetWidth
+            carouselWidth: domNode.offsetWidth,
+            showRightArrow: isResizedWidthSmaller ? 'visible' : null,
+            currentShiftedPosition: !isResizedWidthSmaller ? resizedImageShift : this.state.currentShiftedPosition
+        }, () => {
+            let shiftDomNode = this.findReactDomNode('carouselInsideContainer');
+            shiftDomNode.style.transform = `translateX(${this.state.currentShiftedPosition}px)`;
         });
     }
 
@@ -58,7 +71,7 @@ class Carousel extends Component {
                 resizedImageHeight = 200;
                 resizedImageWidth = (imageNaturalWidth / imageNaturalHeight) * resizedImageHeight;
                 imageDivWidth = (resizedImageWidth + 15) * this.props.children.length;
-                maxImagesToShow = carouselWidth / resizedImageWidth;
+                maxImagesToShow = carouselWidth / resizedImageWidth < 1 ? 1 : carouselWidth / resizedImageWidth;
             }
 
             this.setState({ 
@@ -203,9 +216,9 @@ class Carousel extends Component {
     handleTransform(target, shift) {
         let maxShift = null;
         let domNode = this.findReactDomNode(target);
-        if(shift === 'negative') shift = window.innerWidth < 768 ? -(Math.ceil(this.state.maxImagesToShow) * this.state.imageWidth) : -(Math.floor(this.state.maxImagesToShow) * this.state.imageWidth);
-        else if(shift === 'positive') shift = window.innerWidth < 768 ? Math.ceil(this.state.maxImagesToShow) * this.state.imageWidth : Math.floor(this.state.maxImagesToShow) * this.state.imageWidth;
-        
+        if(shift === 'negative') shift = window.innerWidth < 768 ? -(Math.floor(this.state.maxImagesToShow) * this.state.imageWidth + 15) : -(Math.floor(this.state.maxImagesToShow) * (this.state.imageWidth + 15));
+        else if(shift === 'positive') shift = window.innerWidth < 768 ? Math.floor(this.state.maxImagesToShow) * this.state.imageWidth + 15 : Math.floor(this.state.maxImagesToShow) * (this.state.imageWidth + 15);
+
         if(shift < 0) {
             if(this.state.currentShiftedPosition + (shift * 2) > -(this.state.imageDivWidth)) {
                 if(this.state.currentShiftedPosition + (shift) === -(this.state.imageDivWidth - (this.state.maxImagesToShow * this.state.imageWidth))) this.setState({ showRightArrow: 'hidden' });
