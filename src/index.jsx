@@ -32,12 +32,10 @@ class Carousel extends Component {
     handleCarouselResize() {
         let domNode = this.findReactDomNode('carouselContainer');
         let maxImagesToShow = domNode.offsetWidth / this.state.imageWidth;
-
         let isResizedWidthSmaller = domNode.offsetWidth < this.state.carouselWidth ? true : false;
-        
-        
-        let resizedImageShift;
-        if(!isResizedWidthSmaller && (-(this.state.currentShiftedPosition) === (this.state.imageDivWidth - (this.state.maxImagesToShow * this.state.imageWidth)))) {
+        let resizedImageShift = 0;
+
+        if(!isResizedWidthSmaller && (-(this.state.currentShiftedPosition) >= (this.state.imageDivWidth - (this.state.maxImagesToShow * this.state.imageWidth)))) {
             resizedImageShift = this.state.currentShiftedPosition + (domNode.offsetWidth - this.state.carouselWidth);
         }
 
@@ -48,13 +46,14 @@ class Carousel extends Component {
             currentShiftedPosition: !isResizedWidthSmaller ? resizedImageShift : this.state.currentShiftedPosition
         }, () => {
             let shiftDomNode = this.findReactDomNode('carouselInsideContainer');
+            
             shiftDomNode.style.transform = `translateX(${this.state.currentShiftedPosition}px)`;
+            
         });
     }
 
     componentDidMount() {
         window.addEventListener('resize', _debounce(this.handleCarouselResize, 1000));
-        
 
         this.getImageSize(this.props.children)
         .then((resolve) =>{
@@ -279,14 +278,14 @@ class Carousel extends Component {
 
         return (
             <div id="main-container" ref="mainContainer">
-                { this.props.showArrows ? null : <div className= "chevron-left" style={{ visibility: this.state.showLeftArrow }} onClick={ this.handleClick } dangerouslySetInnerHTML={{ __html: rightArrowSVG }}></div>}
+                { this.props.showArrows ? null : <div className= "chevron-left" ref="chevronLeft" style={{ visibility: this.state.showLeftArrow }} onClick={ this.handleClick } dangerouslySetInnerHTML={{ __html: rightArrowSVG }}></div>}
                 <div id="carousel-container" ref="carouselContainer" style={ carouselStyles } onMouseDown={ this.handleMouseDown }>
                     <div className="carousel-inside-container" ref="carouselInsideContainer">
                     
                     { this.changeImageWidth(this.props.children) }
                     </div>
                 </div>
-                { this.props.showArrows ? null : <div className= "chevron-right" style={{ visibility: this.state.showRightArrow }} onClick={ this.handleClick } dangerouslySetInnerHTML={{ __html: rightArrowSVG }}></div>}
+                { this.props.showArrows ? null : <div className= "chevron-right" ref="chevronRight" style={{ visibility: this.state.showRightArrow }} onClick={ this.handleClick } dangerouslySetInnerHTML={{ __html: rightArrowSVG }}></div>}
             </div>
             
         )
