@@ -13,7 +13,10 @@
     display: flex;
     justify-content: flex-start;
     align-items: center;
-    width: max-content;   
+    width: max-content;
+    width: intrinsic;
+    width: -moz-max-content;
+    width: -webkit-max-content;   
     cursor: pointer;
 }
 

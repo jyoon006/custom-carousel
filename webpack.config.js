@@ -10,6 +10,14 @@ const config = {
     path: BUILD_DIR,
     filename: 'bundle.js'
   },
+  devServer: {
+    port: 8080,
+    headers: { 
+      "Access-Control-Allow-Origin": "*",
+      "Access-Control-Allow-Methods": "GET, POST, PUT, DELETE, PATCH, OPTIONS",
+      "Access-Control-Allow-Headers": "X-Requested-With, content-type, Authorization"
+    }
+  },
   module : {
     loaders : [
       { test : /\.jsx?/, include : [ APP_DIR, SRC_DIR ], loader : 'babel-loader' },
