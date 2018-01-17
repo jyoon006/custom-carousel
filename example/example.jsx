@@ -7,9 +7,9 @@ class Example extends Component {
 
     render() {
         let options = {
-            carouselWidth: 1800,
+            carouselWidth: 1600,
             // showArrows: false
-            // showImages: 4
+            // showImages: 5
         };
 
         return (

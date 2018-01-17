@@ -4,6 +4,7 @@ import './index.css';
 import rightArrowSVG from './svg/Down-Arrow.svg';
 import _throttle from './throttle';
 import _debounce from './debounce';
+import isMobile from './checkMobile';
 
 class Carousel extends Component {
     constructor() {
@@ -29,29 +30,6 @@ class Carousel extends Component {
         };
     }
 
-    handleCarouselResize() {
-        let domNode = this.findReactDomNode('carouselContainer');
-        let maxImagesToShow = domNode.offsetWidth / this.state.imageWidth;
-        let isResizedWidthSmaller = domNode.offsetWidth < this.state.carouselWidth ? true : false;
-        let resizedImageShift = 0;
-
-        if(!isResizedWidthSmaller && (-(this.state.currentShiftedPosition) >= (this.state.imageDivWidth - (this.state.maxImagesToShow * this.state.imageWidth)))) {
-            resizedImageShift = this.state.currentShiftedPosition + (domNode.offsetWidth - this.state.carouselWidth);
-        }
-
-        this.setState({
-            maxImagesToShow: maxImagesToShow,
-            carouselWidth: domNode.offsetWidth,
-            showRightArrow: isResizedWidthSmaller ? 'visible' : null,
-            currentShiftedPosition: !isResizedWidthSmaller ? resizedImageShift : this.state.currentShiftedPosition
-        }, () => {
-            let shiftDomNode = this.findReactDomNode('carouselInsideContainer');
-            
-            shiftDomNode.style.transform = `translateX(${this.state.currentShiftedPosition}px)`;
-            
-        });
-    }
-
     componentDidMount() {
         window.addEventListener('resize', _debounce(this.handleCarouselResize, 1000));
 
@@ -66,7 +44,7 @@ class Carousel extends Component {
             let maxImagesToShow = carouselWidth / resizedImageWidth;
             let resizedImageHeight = (resizedImageWidth + 15) * (imageNaturalHeight / imageNaturalWidth);
 
-            if(resizedImageHeight < 200) {
+            if(resizedImageHeight <= 200) {
                 resizedImageHeight = 200;
                 resizedImageWidth = (imageNaturalWidth / imageNaturalHeight) * resizedImageHeight;
                 imageDivWidth = (resizedImageWidth + 15) * this.props.children.length;
@@ -97,20 +75,29 @@ class Carousel extends Component {
 
     mousemoveListener(event) {
         event.preventDefault();
+        let pageX = null;
+        let userAgent = navigator.userAgent;
+
+
+        // if(isMobile() && userAgent.indexOf('Safari') > -1 && userAgent.indexOf('chrome') < 0) pageX = event.layerX;
+        // else if(isMobile()) pageX = event.changedTouches[0].pageX;
+        // else pageX = event.layerX;
+        pageX = event.layerX;
         
-        if(this.state.mouseDown) this.setState({ previousMovementX: event.layerX });
+        if(this.state.mouseDown) this.setState({ previousMovementX: pageX });
         if(this.state.currentShiftedPosition <= (-(this.state.imageDivWidth) + (this.props.showImages ? Math.floor(this.state.maxImagesToShow) : this.state.maxImagesToShow) * this.state.imageWidth)) this.setState({ showRightArrow: 'hidden' });
         if(this.state.currentShiftedPosition >= 0) this.setState({ showLeftArrow: 'hidden'});
         
-        if(this.state.previousMovementX - event.layerX > 0 && this.state.currentShiftedPosition > (-(this.state.imageDivWidth) + (this.props.showImages ? Math.floor(this.state.maxImagesToShow) : this.state.maxImagesToShow) * this.state.imageWidth)) {
+        if(this.state.previousMovementX - pageX > 0 && this.state.currentShiftedPosition > (-(this.state.imageDivWidth) + (this.props.showImages ? Math.floor(this.state.maxImagesToShow) : this.state.maxImagesToShow) * this.state.imageWidth)) {
             this.setState({ currentShiftedPosition: this.state.currentShiftedPosition - 30, showLeftArrow: 'visible' })
                 
-        } else if(this.state.previousMovementX - event.layerX < 0 && this.state.currentShiftedPosition < 0) {
+        } else if(this.state.previousMovementX - pageX < 0 && this.state.currentShiftedPosition < 0) {
             this.setState({ currentShiftedPosition: this.state.currentShiftedPosition + 30, showRightArrow: 'visible' })
         }
 
         this.handleTranslateAnimation('carouselInsideContainer', this.state.currentShiftedPosition, '0.1s linear');
         if(this.state.mouseDown) this.setState({ mouseDown: false });
+        return true;
     }
 
     findReactDomNode(target) {
@@ -125,6 +112,9 @@ class Carousel extends Component {
         domNode.style.willChange = 'unset';
         document.removeEventListener('mouseup', this.mouseupListener, true);
         domNode.removeEventListener('mousemove', this.mousemoveListener, true);
+
+        // document.removeEventListener('touchend', this.mouseupListener, true);
+        // domNode.removeEventListener('touchmove', this.mousemoveListener, true);
     }
 
     captureMouseEvents() {
@@ -133,6 +123,9 @@ class Carousel extends Component {
         domNode.style.willChange = 'transform';
         document.addEventListener('mouseup', this.mouseupListener, true);
         domNode.addEventListener('mousemove', this.mousemoveListener, true);
+
+        // document.addEventListener('touchend', this.mouseupListener, true);
+        // domNode.addEventListener('touchmove', this.mousemoveListener, true);
     }
 
     handleMouseDown(event) { 
@@ -144,7 +137,6 @@ class Carousel extends Component {
     }
 
     findImgElement(node) {
-
         if(node.length > 1) {
             for(let i = 0; i < node.length; i++) {
                 return this.findImgElement(node[i]);
@@ -158,9 +150,7 @@ class Carousel extends Component {
                     return this.findImgElement(node.props.children);
                 }
             }    
-        }
-
-        
+        }    
     }
     
     getImageSize(children) {
@@ -183,18 +173,42 @@ class Carousel extends Component {
         });
     }
 
-    changeImageWidth(children) {        
+    changeImageWidth(children) { 
+        const getRatioOfMinWidth =  375 / this.state.imageWidth;
+        const minWidthValue = this.state.imageWidth * getRatioOfMinWidth;
+        const minHeightValue = minWidthValue * (this.state.imageHeight / this.state.imageWidth );    
         return React.Children.map(children, (childNode) => {
             return React.cloneElement(childNode, { 
                 style: {
                     width: `${this.state.imageWidth}px`|| '500px',
                     height: `${this.state.imageHeight}px` ||'500px',
-                    minWidth: `${this.state.imageWidth * .5}px`,
-                    minHeight: `${this.state.imageHeight * .5}px`,
+                    minWidth: `${this.state.imageWidth * .75}px`,
+                    minHeight: `${this.state.imageHeight * .75}px`,
                     boxSizing: 'border-box',
                     margin: '0 15px 0 0'
                 }
             });
+        });
+    }
+
+    handleCarouselResize() {
+        let domNode = this.findReactDomNode('carouselContainer');
+        let maxImagesToShow = domNode.offsetWidth / this.state.imageWidth;
+        let isResizedWidthSmaller = domNode.offsetWidth < this.state.carouselWidth ? true : false;
+        let resizedImageShift = 0;
+
+        if(!isResizedWidthSmaller && (-(this.state.currentShiftedPosition) >= (this.state.imageDivWidth - (this.state.maxImagesToShow * this.state.imageWidth)))) {
+            resizedImageShift = this.state.currentShiftedPosition + (domNode.offsetWidth - this.state.carouselWidth);
+        }
+
+        this.setState({
+            maxImagesToShow: maxImagesToShow,
+            carouselWidth: domNode.offsetWidth,
+            showRightArrow: isResizedWidthSmaller ? 'visible' : null,
+            currentShiftedPosition: !isResizedWidthSmaller ? resizedImageShift : this.state.currentShiftedPosition
+        }, () => {
+            let shiftDomNode = this.findReactDomNode('carouselInsideContainer');
+            shiftDomNode.style.transform = `translateX(${this.state.currentShiftedPosition}px)`; 
         });
     }
 
@@ -215,8 +229,12 @@ class Carousel extends Component {
     handleTransform(target, shift) {
         let maxShift = null;
         let domNode = this.findReactDomNode(target);
-        if(shift === 'negative') shift = window.innerWidth < 768 ? -(Math.floor(this.state.maxImagesToShow) * this.state.imageWidth + 15) : -(Math.floor(this.state.maxImagesToShow) * (this.state.imageWidth + 15));
-        else if(shift === 'positive') shift = window.innerWidth < 768 ? Math.floor(this.state.maxImagesToShow) * this.state.imageWidth + 15 : Math.floor(this.state.maxImagesToShow) * (this.state.imageWidth + 15);
+        let newMaxImagesToShow = null;
+
+        if(Math.floor(this.state.maxImagesToShow) < 1) newMaxImagesToShow = Math.ceil(this.state.maxImagesToShow);
+
+        if(shift === 'negative') shift = window.innerWidth < 768 ? -( (newMaxImagesToShow || Math.floor(this.state.maxImagesToShow)) * this.state.imageWidth + 15) : -(Math.floor(this.state.maxImagesToShow) * (this.state.imageWidth + 15));
+        else if(shift === 'positive') shift = window.innerWidth < 768 ? (newMaxImagesToShow || Math.floor(this.state.maxImagesToShow)) * this.state.imageWidth + 15 : Math.floor(this.state.maxImagesToShow) * (this.state.imageWidth + 15);
 
         if(shift < 0) {
             if(this.state.currentShiftedPosition + (shift * 2) > -(this.state.imageDivWidth)) {
@@ -253,15 +271,14 @@ class Carousel extends Component {
         
     }
 
-    handleTranslateAnimation(target, currentShiftedPosition, transitionOptions) {
-        
+    handleTranslateAnimation(target, currentShiftedPosition, transitionOptions) { 
         let domNode = this.findReactDomNode(target);
 
         domNode.style.transform = `translateX(${currentShiftedPosition}px)`;
-        // document.querySelector(target).style.WebkitTransform = `translateX(${currentShiftedPosition}px)`;
-        // document.querySelector(target).style.msTransform = `translateX(${currentShiftedPosition}px)`;
-        // document.querySelector(target).style.MozTransform = `translateX(${currentShiftedPosition}px)`;
-        // document.querySelector(target).style.OTransform = `translateX(${currentShiftedPosition}px)`;
+        domNode.style.WebkitTransform = `translateX(${currentShiftedPosition}px)`;
+        domNode.style.msTransform = `translateX(${currentShiftedPosition}px)`;
+        domNode.style.MozTransform = `translateX(${currentShiftedPosition}px)`;
+        domNode.style.OTransform = `translateX(${currentShiftedPosition}px)`;
         domNode.style.transition = transitionOptions; 
     }
 
@@ -272,20 +289,20 @@ class Carousel extends Component {
         };
 
         if (this.props.showImages > 0) {
-            if(this.state.imageWidth) carouselStyles.width = this.state.imageWidth * this.props.showImages;
-            else carouselStyles.width = 500 * this.props.showImages;
+            carouselStyles.width = this.props.showImages * (this.state.imageWidth + 15);
+            // if(this.state.imageWidth) carouselStyles.width = this.state.imageWidth * this.props.showImages;
+            // else carouselStyles.width = 500 * this.props.showImages;
         }
 
         return (
             <div id="main-container" ref="mainContainer">
-                { this.props.showArrows ? null : <div className= "chevron-left" ref="chevronLeft" style={{ visibility: this.state.showLeftArrow }} onClick={ this.handleClick } dangerouslySetInnerHTML={{ __html: rightArrowSVG }}></div>}
-                <div id="carousel-container" ref="carouselContainer" style={ carouselStyles } onMouseDown={ this.handleMouseDown }>
+                { this.props.showArrows ? null : <span className= "chevron-left" ref="chevronLeft" style={{ visibility: this.state.showLeftArrow }} onClick={ this.handleClick } dangerouslySetInnerHTML={{ __html: rightArrowSVG }}></span>}
+                <div id="carousel-container" ref="carouselContainer" style={ carouselStyles } onMouseDown={ this.handleMouseDown } >
                     <div className="carousel-inside-container" ref="carouselInsideContainer">
-                    
                     { this.changeImageWidth(this.props.children) }
                     </div>
                 </div>
-                { this.props.showArrows ? null : <div className= "chevron-right" ref="chevronRight" style={{ visibility: this.state.showRightArrow }} onClick={ this.handleClick } dangerouslySetInnerHTML={{ __html: rightArrowSVG }}></div>}
+                { this.props.showArrows ? null : <span className= "chevron-right" ref="chevronRight" style={{ visibility: this.state.showRightArrow }} onClick={ this.handleClick } dangerouslySetInnerHTML={{ __html: rightArrowSVG }}></span>}
             </div>
             
         )
